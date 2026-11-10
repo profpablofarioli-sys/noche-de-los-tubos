@@ -50,6 +50,9 @@
 
   .persona { border-top: 1px solid rgba(201,122,43,.35); padding: 8px 0; cursor: pointer; }
   .persona:first-of-type { border-top: 0; }
+  .persona .cabecera { display: flex; gap: 12px; align-items: center; }
+  .persona .foto { width: 62px; height: 78px; object-fit: cover; flex: none;
+                   border: 1px solid #c97a2b; border-radius: 4px; background: #000; }
   .persona .nombre { font-weight: 700; color: #ffb55c; font-size: 1.05em; }
   .persona .resumen { color: #d8b88c; font-size: .92em; }
   .persona .detalle { display: none; margin: 6px 0 0; padding: 0; list-style: none; }
@@ -96,7 +99,7 @@
   /* ========================================================================== */
 
   const PERSONAS = [
-    { nombre: "Alberto Luis Bedia", resumen: "33 años · Empleado, Oficina de Personal de Dálmine-Siderca",
+    { nombre: "Alberto Luis Bedia", foto: "fotos/alberto-bedia.jpg", resumen: "33 años · Empleado, Oficina de Personal de Dálmine-Siderca",
       datos: [
         ["Edad al momento del hecho", "33 años."],
         ["Rol en la empresa", "Empleado en la Oficina de Personal de Dálmine-Siderca."],
@@ -104,7 +107,7 @@
         ["Situación actual", "Detenido-desaparecido."],
         ["Datos clave en la causa", "Pocos días antes de su secuestro, le reveló a su compañero Eduardo Pitter que en la oficina de personal existía una libreta negra o lista en una caja de seguridad donde figuraban los nombres de los trabajadores que “molestaban” a la compañía. Tras su desaparición, la gerencia envió un telegrama de despido a su domicilio a pesar de los reclamos de su familia."]
       ] },
-    { nombre: "Raúl Aroldo Moreno", resumen: "27 años · Fotógrafo profesional y obrero en Dálmine-Siderca",
+    { nombre: "Raúl Aroldo Moreno", foto: "fotos/raul-moreno.jpg", resumen: "27 años · Fotógrafo profesional y obrero en Dálmine-Siderca",
       datos: [
         ["Edad al momento del hecho", "27 años."],
         ["Rol en la empresa / Profesión", "Fotógrafo profesional y obrero en Dálmine-Siderca (sección Rore, en Campana)."],
@@ -113,7 +116,7 @@
         ["Situación actual", "Detenido-desaparecido."],
         ["Datos clave en la causa", "El operativo de secuestro fue realizado por unas 15 personas armadas y vestidas de civil. Horas antes, el grupo represivo había ido a la casa de su padre; la familia infiere que usaron la dirección paterna asentada en su legajo laboral."]
       ] },
-    { nombre: "Manuel Ignacio Martínez", resumen: "20 años · Obrero de Dálmine-Siderca",
+    { nombre: "Manuel Ignacio Martínez", foto: "fotos/manuel-martinez.jpg", resumen: "20 años · Obrero de Dálmine-Siderca",
       datos: [
         ["Edad al momento del hecho", "20 años."],
         ["Rol en la empresa", "Obrero / trabajador de Dálmine-Siderca."],
@@ -121,7 +124,7 @@
         ["Situación actual", "Detenido-desaparecido."],
         ["Datos clave en la causa", "Fue secuestrado en el marco del mismo operativo conjunto contra trabajadores y activistas de la planta metalúrgica de Campana. Figuraba en las anotaciones de seguimiento de la inteligencia interna de la empresa."]
       ] },
-    { nombre: "Armando Culzoni", resumen: "24 años · Obrero de Dálmine-Siderca",
+    { nombre: "Armando Culzoni", foto: "fotos/armando-culzoni.jpg", resumen: "24 años · Obrero de Dálmine-Siderca",
       datos: [
         ["Edad al momento del hecho", "24 años."],
         ["Rol en la empresa", "Obrero / trabajador de Dálmine-Siderca."],
@@ -138,9 +141,14 @@
     div.className = "persona";
     const items = p.datos.map(d => "<li><b>" + d[0] + ":</b> " + d[1] + "</li>").join("");
     div.innerHTML =
-      '<div class="nombre">' + p.nombre + "</div>" +
-      '<div class="resumen">' + p.resumen + "</div>" +
-      '<div class="mas">Pasá el cursor (o tocá) para ver la ficha completa</div>' +
+      '<div class="cabecera">' +
+        '<img class="foto" src="' + p.foto + '" alt="Retrato de ' + p.nombre + '">' +
+        '<div>' +
+          '<div class="nombre">' + p.nombre + "</div>" +
+          '<div class="resumen">' + p.resumen + "</div>" +
+          '<div class="mas">Pasá el cursor (o tocá) para ver la ficha completa</div>' +
+        "</div>" +
+      "</div>" +
       '<ul class="detalle">' + items + "</ul>";
     div.addEventListener("click", () => div.classList.toggle("abierta"));
     lista.appendChild(div);

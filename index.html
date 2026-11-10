@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>La Noche de los Tubos - Monumento interactivo</title>
 <style>
-  html, body { margin: 0; height: 100%; background: #000; font-family: "Open Sans", Arial, sans-serif; }
+  html, body { margin: 0; min-height: 100%; background: #000; font-family: "Open Sans", Arial, sans-serif; }
   .wrap { position: relative; max-width: 1000px; margin: 0 auto; }
-  .wrap img { display: block; width: 100%; height: auto; }
+  .wrap > img { display: block; width: 100%; height: auto; }
 
-  /* Zonas interactivas sobre cada tubo (valores en % de la imagen) */
+  /* ---------- Zonas interactivas sobre cada tubo (valores en % de la imagen) ---------- */
   .zona {
     position: absolute; display: block; cursor: pointer;
     border-radius: 6px; transition: box-shadow .25s, background .25s;
@@ -19,29 +19,12 @@
     box-shadow: 0 0 25px 8px rgba(255, 150, 30, .55);
     outline: none;
   }
-
   /* Posiciones aproximadas: ajustar con ?debug */
   #vidas    { left: 40%; top: 3%;  width: 6.5%; height: 46%; z-index: 2; }
   #puertas  { left: 65%; top: 23%; width: 6.5%; height: 51%; z-index: 2; }
   #justicia { left: 31%; top: 41%; width: 9%;   height: 32%; z-index: 1; }
   #ciudad   { left: 53%; top: 36%; width: 6%;   height: 35%; z-index: 1; }
 
-  /* Panel con los 4 nombres */
-  #panel {
-    position: absolute; left: 48%; top: 6%; width: 36%;
-    background: rgba(15, 8, 0, .92); color: #f5d9b0;
-    border: 1px solid #c97a2b; border-radius: 8px;
-    padding: 14px 16px; box-shadow: 0 0 30px rgba(255,140,30,.35);
-    opacity: 0; visibility: hidden; transform: translateY(8px);
-    transition: opacity .25s, transform .25s, visibility .25s;
-    z-index: 5; font-size: clamp(11px, 1.5vw, 15px); line-height: 1.4;
-  }
-  #panel.visible { opacity: 1; visibility: visible; transform: translateY(0); }
-  #panel h3 { margin: 0 0 8px; color: #ff9d2e; letter-spacing: .08em; font-size: 1.05em; }
-  #panel p { margin: 0 0 8px; }
-  #panel strong { color: #ffb55c; }
-
-  /* Etiqueta de ayuda al pasar por los demás tubos */
   .tip {
     position: absolute; bottom: 102%; left: 50%; transform: translateX(-50%);
     background: #1a0e03; color: #ffb55c; border: 1px solid #c97a2b;
@@ -49,6 +32,38 @@
     opacity: 0; pointer-events: none; transition: opacity .2s;
   }
   .zona:hover .tip, .zona:focus .tip { opacity: 1; }
+
+  /* ---------- Panel "Vidas interrumpidas" ---------- */
+  #panel {
+    position: absolute; left: 48%; top: 3%; width: 50%; max-height: 80%;
+    overflow-y: auto; box-sizing: border-box;
+    background: rgba(15, 8, 0, .95); color: #f5d9b0;
+    border: 1px solid #c97a2b; border-radius: 8px;
+    padding: 14px 16px; box-shadow: 0 0 30px rgba(255,140,30,.35);
+    opacity: 0; visibility: hidden; transform: translateY(8px);
+    transition: opacity .25s, transform .25s, visibility .25s;
+    z-index: 5; font-size: clamp(11px, 1.35vw, 14px); line-height: 1.45;
+  }
+  #panel.visible { opacity: 1; visibility: visible; transform: translateY(0); }
+  #panel h3 { margin: 0 0 10px; color: #ff9d2e; letter-spacing: .08em; font-size: 1.1em; }
+  #panel .cerrar { display: none; }
+
+  .persona { border-top: 1px solid rgba(201,122,43,.35); padding: 8px 0; cursor: pointer; }
+  .persona:first-of-type { border-top: 0; }
+  .persona .nombre { font-weight: 700; color: #ffb55c; font-size: 1.05em; }
+  .persona .resumen { color: #d8b88c; font-size: .92em; }
+  .persona .detalle { display: none; margin: 6px 0 0; padding: 0; list-style: none; }
+  .persona .detalle li { margin: 0 0 5px; }
+  .persona .detalle b { color: #ffb55c; }
+  .persona:hover .detalle, .persona.abierta .detalle { display: block; }
+  .persona .mas { font-size: .8em; color: #c97a2b; }
+  .persona:hover .mas, .persona.abierta .mas { display: none; }
+
+  /* Pantallas chicas: el panel pasa a ocupar todo el ancho, debajo de la imagen */
+  @media (max-width: 700px) {
+    #panel { position: fixed; left: 2%; right: 2%; top: auto; bottom: 2%; width: auto; max-height: 60vh; font-size: 13px; }
+    #panel .cerrar { display: block; float: right; color: #ffb55c; cursor: pointer; font-size: 1.4em; line-height: 1; }
+  }
 
   /* Modo de ajuste: agregar ?debug a la dirección */
   body.debug .zona { background: rgba(0, 200, 255, .25); outline: 1px dashed #0cf; }
@@ -59,53 +74,97 @@
 <div class="wrap" id="wrap">
   <img src="monumento.png" alt="Monumento La Noche de los Tubos con los textos Vidas interrumpidas, Puertas adentro, Justicia incompleta y Ciudad marcada">
 
-  <!-- Vidas interrumpidas: despliega panel -->
-  <a class="zona" id="vidas" href="#" aria-label="Vidas interrumpidas">
-    <span class="tip">Vidas interrumpidas</span>
-  </a>
-
-  <div id="panel" role="region" aria-label="Vidas interrumpidas">
-    <h3>VIDAS INTERRUMPIDAS</h3>
-    <p><strong>Alberto Luis Bedia:</strong> Texto breve de ejemplo. Reemplazar.</p>
-    <p><strong>Raúl Aroldo Moreno:</strong> Texto breve de ejemplo. Reemplazar.</p>
-    <p><strong>Manuel Ignacio Martínez:</strong> Texto breve de ejemplo. Reemplazar.</p>
-    <p><strong>Armando Culzoni:</strong> Texto breve de ejemplo. Reemplazar.</p>
-  </div>
-
-  <!-- Enlaces: completar con las direcciones de tu story -->
-  <a class="zona" id="puertas"  href="#" data-dest="video"    aria-label="Puertas adentro"><span class="tip">Puertas adentro · ver video</span></a>
+  <a class="zona" id="vidas" href="#" aria-label="Vidas interrumpidas"><span class="tip">Vidas interrumpidas</span></a>
+  <a class="zona" id="puertas"  href="#" data-dest="video"    data-blank="1" aria-label="Puertas adentro"><span class="tip">Puertas adentro · ver video</span></a>
   <a class="zona" id="justicia" href="#" data-dest="timeline" aria-label="Justicia incompleta"><span class="tip">Justicia incompleta · línea de tiempo</span></a>
   <a class="zona" id="ciudad"   href="#" data-dest="mapa"     aria-label="Ciudad marcada"><span class="tip">Ciudad marcada · mapa</span></a>
+
+  <div id="panel" role="region" aria-label="Vidas interrumpidas">
+    <span class="cerrar" id="cerrar" aria-label="Cerrar">×</span>
+    <h3>VIDAS INTERRUMPIDAS</h3>
+    <div id="lista"></div>
+  </div>
 </div>
 
 <script>
-  // ==== COMPLETAR ESTAS TRES DIRECCIONES ====
-  const URL_VIDEO    = "https://storymaps.arcgis.com/stories/5201520765d4411c9bf037cdfd08c6c9";  // video de YouTube
-  const URL_MAPA     = "https://storymaps.arcgis.com/stories/5201520765d4411c9bf037cdfd08c6c9";  // mapa del final
-  const URL_TIMELINE = "https://storymaps.arcgis.com/stories/5201520765d4411c9bf037cdfd08c6c9";  // línea de tiempo
-  // ==========================================
+  /* ================= ENLACES (COMPLETAR LOS DOS DE LA STORY) =================
+     Cómo obtenerlos: abrí tu story publicada, pasá el cursor por un título (heading),
+     tocá el ícono de cadena que aparece a su izquierda y pegá acá el enlace copiado. */
+  const URL_VIDEO    = "https://youtu.be/T3gayTTZPPY?si=tAmc6Tggk2fzqTo6";
+  const URL_MAPA     = "https://storymaps.arcgis.com/stories/5201520765d4411c9bf037cdfd08c6c9"; // PEGAR enlace al título del mapa
+  const URL_TIMELINE = "https://storymaps.arcgis.com/stories/5201520765d4411c9bf037cdfd08c6c9#ref-n-qrx2rR"; // línea de tiempo
+  /* ========================================================================== */
 
-  const destinos = { video: URL_VIDEO, mapa: URL_MAPA, timeline: URL_TIMELINE };
+  const PERSONAS = [
+    { nombre: "Alberto Luis Bedia", resumen: "33 años · Empleado, Oficina de Personal de Dálmine-Siderca",
+      datos: [
+        ["Edad al momento del hecho", "33 años."],
+        ["Rol en la empresa", "Empleado en la Oficina de Personal de Dálmine-Siderca."],
+        ["Lugar y fecha de secuestro", "Privado de su libertad el 22 de septiembre de 1976 en su casa de la calle Corrientes 175, del barrio Obrero en Campana."],
+        ["Situación actual", "Detenido-desaparecido."],
+        ["Datos clave en la causa", "Pocos días antes de su secuestro, le reveló a su compañero Eduardo Pitter que en la oficina de personal existía una libreta negra o lista en una caja de seguridad donde figuraban los nombres de los trabajadores que “molestaban” a la compañía. Tras su desaparición, la gerencia envió un telegrama de despido a su domicilio a pesar de los reclamos de su familia."]
+      ] },
+    { nombre: "Raúl Aroldo Moreno", resumen: "27 años · Fotógrafo profesional y obrero en Dálmine-Siderca",
+      datos: [
+        ["Edad al momento del hecho", "27 años."],
+        ["Rol en la empresa / Profesión", "Fotógrafo profesional y obrero en Dálmine-Siderca (sección Rore, en Campana)."],
+        ["Lugar y fecha de secuestro", "Secuestrado la noche del 22 de septiembre de 1976 en su domicilio de la calle Moreno 984, Campana."],
+        ["Lugar de cautiverio verificado", "Centro Clandestino de Detención “El Tolueno”."],
+        ["Situación actual", "Detenido-desaparecido."],
+        ["Datos clave en la causa", "El operativo de secuestro fue realizado por unas 15 personas armadas y vestidas de civil. Horas antes, el grupo represivo había ido a la casa de su padre; la familia infiere que usaron la dirección paterna asentada en su legajo laboral."]
+      ] },
+    { nombre: "Manuel Ignacio Martínez", resumen: "20 años · Obrero de Dálmine-Siderca",
+      datos: [
+        ["Edad al momento del hecho", "20 años."],
+        ["Rol en la empresa", "Obrero / trabajador de Dálmine-Siderca."],
+        ["Lugar y fecha de secuestro", "Privado de su libertad el 22 de septiembre de 1976 en Campana."],
+        ["Situación actual", "Detenido-desaparecido."],
+        ["Datos clave en la causa", "Fue secuestrado en el marco del mismo operativo conjunto contra trabajadores y activistas de la planta metalúrgica de Campana. Figuraba en las anotaciones de seguimiento de la inteligencia interna de la empresa."]
+      ] },
+    { nombre: "Armando Culzoni", resumen: "24 años · Obrero de Dálmine-Siderca",
+      datos: [
+        ["Edad al momento del hecho", "24 años."],
+        ["Rol en la empresa", "Obrero / trabajador de Dálmine-Siderca."],
+        ["Lugar y fecha de secuestro", "Privado de su libertad el 22 de septiembre de 1976 en Campana."],
+        ["Situación actual", "Detenido-desaparecido."],
+        ["Datos clave en la causa", "Integraba el grupo de cuatro operarios de la acería/fábrica de tubos cuyo secuestro simultáneo esa misma jornada dio nombre al trágico episodio conocido como “La Noche de los Tubos”."]
+      ] }
+  ];
+
+  // Armado del panel
+  const lista = document.getElementById("lista");
+  PERSONAS.forEach(p => {
+    const div = document.createElement("div");
+    div.className = "persona";
+    const items = p.datos.map(d => "<li><b>" + d[0] + ":</b> " + d[1] + "</li>").join("");
+    div.innerHTML =
+      '<div class="nombre">' + p.nombre + "</div>" +
+      '<div class="resumen">' + p.resumen + "</div>" +
+      '<div class="mas">Pasá el cursor (o tocá) para ver la ficha completa</div>' +
+      '<ul class="detalle">' + items + "</ul>";
+    div.addEventListener("click", () => div.classList.toggle("abierta"));
+    lista.appendChild(div);
+  });
+
+  // Apertura y cierre del panel
   const panel = document.getElementById("panel");
   const vidas = document.getElementById("vidas");
-  const esTactil = window.matchMedia("(hover: none)").matches;
-
-  if (location.search.includes("debug")) document.body.classList.add("debug");
-
-  // Panel de "Vidas interrumpidas"
   let cierre;
-  const abrir = () => { clearTimeout(cierre); panel.classList.add("visible"); };
-  const cerrar = () => { cierre = setTimeout(() => panel.classList.remove("visible"), 250); };
+  const abrir  = () => { clearTimeout(cierre); panel.classList.add("visible"); };
+  const cerrar = () => { cierre = setTimeout(() => panel.classList.remove("visible"), 300); };
 
   vidas.addEventListener("mouseenter", abrir);
   vidas.addEventListener("mouseleave", cerrar);
   vidas.addEventListener("focus", abrir);
-  vidas.addEventListener("blur", cerrar);
   panel.addEventListener("mouseenter", abrir);
   panel.addEventListener("mouseleave", cerrar);
   vidas.addEventListener("click", e => { e.preventDefault(); panel.classList.toggle("visible"); });
+  document.getElementById("cerrar").addEventListener("click", () => panel.classList.remove("visible"));
 
-  // Redirecciones: abren en la ventana principal (fuera del iframe si está incrustada)
+  // Redirecciones
+  const destinos = { video: URL_VIDEO, mapa: URL_MAPA, timeline: URL_TIMELINE };
+  const esTactil = window.matchMedia("(hover: none)").matches;
+
   document.querySelectorAll(".zona[data-dest]").forEach(z => {
     let primerToque = false;
     z.addEventListener("click", e => {
@@ -114,12 +173,14 @@
       if (esTactil && !primerToque) {
         primerToque = true;
         z.classList.add("tocado");
-        setTimeout(() => primerToque = false, 2500);
+        setTimeout(() => { primerToque = false; }, 2500);
         return;
       }
-      window.open(destinos[z.dataset.dest], "_top");
+      window.open(destinos[z.dataset.dest], z.dataset.blank ? "_blank" : "_top");
     });
   });
+
+  if (location.search.includes("debug")) document.body.classList.add("debug");
 </script>
 </body>
 </html>

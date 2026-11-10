@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>La Noche de los Tubos - Monumento interactivo</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #000; font-family: "Open Sans", Arial, sans-serif; }
+  .wrap { position: relative; max-width: 1000px; margin: 0 auto; }
+  .wrap img { display: block; width: 100%; height: auto; }
+
+  /* Zonas interactivas sobre cada tubo (valores en % de la imagen) */
+  .zona {
+    position: absolute; display: block; cursor: pointer;
+    border-radius: 6px; transition: box-shadow .25s, background .25s;
+  }
+  .zona:hover, .zona:focus {
+    background: rgba(255, 160, 40, .12);
+    box-shadow: 0 0 25px 8px rgba(255, 150, 30, .55);
+    outline: none;
+  }
+
+  /* Posiciones aproximadas: ajustar con ?debug */
+  #vidas    { left: 40%; top: 3%;  width: 6.5%; height: 46%; z-index: 2; }
+  #puertas  { left: 65%; top: 23%; width: 6.5%; height: 51%; z-index: 2; }
+  #justicia { left: 31%; top: 41%; width: 9%;   height: 32%; z-index: 1; }
+  #ciudad   { left: 53%; top: 36%; width: 6%;   height: 35%; z-index: 1; }
+
+  /* Panel con los 4 nombres */
+  #panel {
+    position: absolute; left: 48%; top: 6%; width: 36%;
+    background: rgba(15, 8, 0, .92); color: #f5d9b0;
+    border: 1px solid #c97a2b; border-radius: 8px;
+    padding: 14px 16px; box-shadow: 0 0 30px rgba(255,140,30,.35);
+    opacity: 0; visibility: hidden; transform: translateY(8px);
+    transition: opacity .25s, transform .25s, visibility .25s;
+    z-index: 5; font-size: clamp(11px, 1.5vw, 15px); line-height: 1.4;
+  }
+  #panel.visible { opacity: 1; visibility: visible; transform: translateY(0); }
+  #panel h3 { margin: 0 0 8px; color: #ff9d2e; letter-spacing: .08em; font-size: 1.05em; }
+  #panel p { margin: 0 0 8px; }
+  #panel strong { color: #ffb55c; }
+
+  /* Etiqueta de ayuda al pasar por los demás tubos */
+  .tip {
+    position: absolute; bottom: 102%; left: 50%; transform: translateX(-50%);
+    background: #1a0e03; color: #ffb55c; border: 1px solid #c97a2b;
+    padding: 4px 10px; border-radius: 4px; font-size: 12px; white-space: nowrap;
+    opacity: 0; pointer-events: none; transition: opacity .2s;
+  }
+  .zona:hover .tip, .zona:focus .tip { opacity: 1; }
+
+  /* Modo de ajuste: agregar ?debug a la dirección */
+  body.debug .zona { background: rgba(0, 200, 255, .25); outline: 1px dashed #0cf; }
+</style>
+</head>
+<body>
+
+<div class="wrap" id="wrap">
+  <img src="monumento.png" alt="Monumento La Noche de los Tubos con los textos Vidas interrumpidas, Puertas adentro, Justicia incompleta y Ciudad marcada">
+
+  <!-- Vidas interrumpidas: despliega panel -->
+  <a class="zona" id="vidas" href="#" aria-label="Vidas interrumpidas">
+    <span class="tip">Vidas interrumpidas</span>
+  </a>
+
+  <div id="panel" role="region" aria-label="Vidas interrumpidas">
+    <h3>VIDAS INTERRUMPIDAS</h3>
+    <p><strong>Alberto Luis Bedia:</strong> Texto breve de ejemplo. Reemplazar.</p>
+    <p><strong>Raúl Aroldo Moreno:</strong> Texto breve de ejemplo. Reemplazar.</p>
+    <p><strong>Manuel Ignacio Martínez:</strong> Texto breve de ejemplo. Reemplazar.</p>
+    <p><strong>Armando Culzoni:</strong> Texto breve de ejemplo. Reemplazar.</p>
+  </div>
+
+  <!-- Enlaces: completar con las direcciones de tu story -->
+  <a class="zona" id="puertas"  href="#" data-dest="video"    aria-label="Puertas adentro"><span class="tip">Puertas adentro · ver video</span></a>
+  <a class="zona" id="justicia" href="#" data-dest="timeline" aria-label="Justicia incompleta"><span class="tip">Justicia incompleta · línea de tiempo</span></a>
+  <a class="zona" id="ciudad"   href="#" data-dest="mapa"     aria-label="Ciudad marcada"><span class="tip">Ciudad marcada · mapa</span></a>
+</div>
+
+<script>
+  // ==== COMPLETAR ESTAS TRES DIRECCIONES ====
+  const URL_VIDEO    = "https://storymaps.arcgis.com/stories/5201520765d4411c9bf037cdfd08c6c9";  // video de YouTube
+  const URL_MAPA     = "https://storymaps.arcgis.com/stories/5201520765d4411c9bf037cdfd08c6c9";  // mapa del final
+  const URL_TIMELINE = "https://storymaps.arcgis.com/stories/5201520765d4411c9bf037cdfd08c6c9";  // línea de tiempo
+  // ==========================================
+
+  const destinos = { video: URL_VIDEO, mapa: URL_MAPA, timeline: URL_TIMELINE };
+  const panel = document.getElementById("panel");
+  const vidas = document.getElementById("vidas");
+  const esTactil = window.matchMedia("(hover: none)").matches;
+
+  if (location.search.includes("debug")) document.body.classList.add("debug");
+
+  // Panel de "Vidas interrumpidas"
+  let cierre;
+  const abrir = () => { clearTimeout(cierre); panel.classList.add("visible"); };
+  const cerrar = () => { cierre = setTimeout(() => panel.classList.remove("visible"), 250); };
+
+  vidas.addEventListener("mouseenter", abrir);
+  vidas.addEventListener("mouseleave", cerrar);
+  vidas.addEventListener("focus", abrir);
+  vidas.addEventListener("blur", cerrar);
+  panel.addEventListener("mouseenter", abrir);
+  panel.addEventListener("mouseleave", cerrar);
+  vidas.addEventListener("click", e => { e.preventDefault(); panel.classList.toggle("visible"); });
+
+  // Redirecciones: abren en la ventana principal (fuera del iframe si está incrustada)
+  document.querySelectorAll(".zona[data-dest]").forEach(z => {
+    let primerToque = false;
+    z.addEventListener("click", e => {
+      e.preventDefault();
+      // En celulares: primer toque muestra la etiqueta, segundo toque redirige
+      if (esTactil && !primerToque) {
+        primerToque = true;
+        z.classList.add("tocado");
+        setTimeout(() => primerToque = false, 2500);
+        return;
+      }
+      window.open(destinos[z.dataset.dest], "_top");
+    });
+  });
+</script>
+</body>
+</html>
